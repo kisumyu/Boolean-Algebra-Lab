@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boolean Logic Lab — Simplify</title>
+<style>
+:root{
+  --bg:#f4f7fb;--panel:#ffffff;--panel2:#f1f5f9;--text:#172033;
+  --muted:#64748b;--blue:#2563eb;--purple:#7c3aed;--green:#059669;
+  --red:#dc2626;--border:#d9e2ef;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+button{font:inherit;cursor:pointer}
+.container{max-width:1000px;margin:auto;padding:28px 20px 48px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:28px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{background:linear-gradient(135deg,#6366f1,#06b6d4);width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:20px;font-weight:900}
+h1{font-size:23px;margin:0}
+.subtitle{font-size:13px;color:var(--muted);margin-top:4px}
+.score-box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:10px 18px;text-align:center;min-width:90px}
+.score-box strong{color:var(--green);font-size:22px}
+.score-box small{display:block;color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:20px}
+.nav-panel{background:linear-gradient(180deg,#ffffff,#f1f5f9);border:1px solid #d9e2ef;border-radius:14px;padding:16px 18px;margin-bottom:22px}
+.nav-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.nav-panel-head h3{margin:0;font-size:14px;color:#172033}
+.nav-panel-head span{font-size:12px;color:var(--muted)}
+.question-nav{display:flex;flex-wrap:wrap;gap:8px;margin:0}
+.qnav{width:38px;height:38px;border-radius:10px;background:#e8eef6;border:1px solid #cbd5e1;color:#64748b;font-weight:700;transition:.15s}
+.qnav:hover{border-color:var(--blue);color:#fff}
+.qnav.current{border-color:var(--blue);background:#dbeafe;color:#1d4ed8;box-shadow:0 0 0 2px #60a5fa22}
+.qnav.correct{border-color:#247b5b;background:#dcfce7;color:#166534}
+.qnav.incorrect{border-color:#a33d57;background:#fee2e2;color:#b91c1c}
+.qnav.unanswered{border-color:#34445f}
+.qnav:disabled{opacity:1;cursor:pointer}
+.card,.side-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:24px}
+.progress-row{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:10px}
+.progress{height:7px;background:#e2e8f0;border-radius:20px;overflow:hidden;margin-bottom:26px}
+.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#6366f1,#22d3ee);transition:width .25s}
+.badge{display:inline-block;padding:5px 10px;background:#dbeafe;color:#1d4ed8;border-radius:7px;font-size:12px;font-weight:700}
+.difficulty.easy{background:#dcfce7;color:#166534}.difficulty.medium{background:#fef3c7;color:#92400e}.difficulty.hard{background:#fee2e2;color:#b91c1c}
+.question-title{font-size:20px;margin:18px 0}
+.expression{background:#f8fafc;border:1px solid #d9e2ef;border-radius:12px;padding:22px 16px;text-align:center;font-size:clamp(17px,3vw,24px);font-weight:700;line-height:1.7;overflow-wrap:anywhere;margin:18px 0}
+.answer-list{display:flex;flex-direction:column;gap:16px}
+.answer{width:100%;display:block}
+.celebration{position:relative;overflow:hidden;text-align:center;background:linear-gradient(135deg,#eff6ff,#f5f3ff);border:1px solid #bfdbfe;border-radius:16px;padding:24px;margin:16px 0;animation:pop .55s cubic-bezier(.2,1.5,.5,1)}
+.celebration .big-score{font-size:clamp(44px,8vw,72px);font-weight:900;color:#d97706;text-shadow:0 0 24px #fbbf2433;line-height:1.1}
+.celebration h2{margin:8px 0;font-size:24px}
+.celebration p{color:var(--muted);margin:8px 0}
+.confetti{position:fixed;top:-12px;width:9px;height:14px;z-index:99;pointer-events:none;animation:fall 2.8s linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.1}}
+@keyframes pop{0%{transform:scale(.65);opacity:0}70%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+.answer{background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:16px 18px;text-align:left;transition:.15s}
+.answer:hover:not(:disabled){border-color:var(--blue);background:#e0ecff;transform:translateY(-1px)}
+.answer.correct{border-color:var(--green);background:#dcfce7}
+.answer.wrong{border-color:var(--red);background:#fee2e2}
+.answer:disabled{cursor:default}
+.feedback{margin-top:18px;border-radius:12px;padding:16px;display:none;line-height:1.65}
+.feedback.show{display:block}
+.feedback.good{background:#dcfce7;border:1px solid #247b5b}
+.feedback.bad{background:#fee2e2;border:1px solid #8d3b51}
+.feedback h3{margin:0 0 6px;font-size:16px}
+.controls{display:flex;justify-content:space-between;gap:10px;margin-top:22px;flex-wrap:wrap}
+.primary,.secondary{border:none;border-radius:10px;padding:12px 20px;font-weight:700}
+.primary{background:#6366f1;color:white}
+.primary:hover{background:#818cf8}
+.secondary{background:#e2e8f0;color:var(--text)}
+.secondary:hover{background:#cbd5e1}
+.sidebar{display:flex;flex-direction:column;gap:16px}
+.side-card h3{font-size:15px;margin:0 0 12px}
+.side-card p{color:var(--muted);font-size:13px;line-height:1.65;margin:8px 0}
+.law{border-bottom:1px solid var(--border);padding:9px 0;font-size:13px}
+.law:last-child{border:none}
+.law strong{display:block;color:var(--blue);margin-bottom:4px}
+.law code{color:#7c3aed;font-family:inherit;font-size:12px}
+.hidden{display:none!important}
+footer{text-align:center;margin-top:28px;color:var(--muted);font-size:12px}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.container{padding:18px 12px 40px}.card{padding:18px}header{margin-bottom:22px}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="logo">
+    <div class="logo-icon">∧∨</div>
+    <div><h1>Boolean Logic Lab</h1><div class="subtitle">Simplification Challenge</div></div>
+  </div>
+  <div class="score-box"><strong id="score">0</strong><small>Points</small></div>
+</header>
+
+<div class="layout">
+<main class="card">
+  <div class="nav-panel"><div class="nav-panel-head"><h3>🧭 Question Navigator</h3><span>Jump to any question · Green = correct · Red = incorrect</span></div><div class="question-nav" id="question-nav" aria-label="Question navigation"></div></div>
+  <div class="progress-row"><span id="question-number">Question 1</span><span id="progress-text">0 / 10</span></div>
+  <div class="progress"><div class="progress-fill" id="progress-fill"></div></div>
+  <span class="badge">SIMPLIFY</span> <span class="badge difficulty" id="difficulty-badge">EASY</span>
+  <h2 class="question-title">Choose the simplest equivalent Boolean expression.</h2>
+  <div class="expression" id="expression"></div>
+  <div class="answer-list" id="answers"></div>
+  <div class="feedback" id="feedback"><h3 id="feedback-title"></h3><div id="feedback-text"></div></div>
+  <div class="controls">
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="secondary" id="hint-button" onclick="showHint()">💡 Hint</button><button class="secondary" id="restart-button" onclick="restartGame()">↻ Restart</button></div>
+    <button class="primary" id="next-button" onclick="nextQuestion()" disabled>Next Question →</button>
+  </div>
+</main>
+
+<aside class="sidebar">
+  <div class="side-card">
+    <h3>📘 Boolean Laws</h3>
+    <div class="law"><strong>Identity</strong>A AND TRUE = A<br>A OR FALSE = A</div>
+    <div class="law"><strong>Domination</strong>A AND FALSE = FALSE<br>A OR TRUE = TRUE</div>
+    <div class="law"><strong>Idempotent</strong>A AND A = A<br>A OR A = A</div>
+    <div class="law"><strong>Complement</strong>A AND NOT A = FALSE<br>A OR NOT A = TRUE</div>
+    <div class="law"><strong>Double Negation</strong>NOT (NOT A) = A</div>
+    <div class="law"><strong>Absorption</strong>A OR (A AND B) = A<br>A AND (A OR B) = A</div>
+    <div class="law"><strong>De Morgan</strong>NOT (A AND B) = NOT A OR NOT B<br>NOT (A OR B) = NOT A AND NOT B</div>
+    <div class="law"><strong>Distributive</strong>A AND (B OR C)<br>= (A AND B) OR (A AND C)</div>
+  </div>
+  <div class="side-card">
+    <h3>🎯 How to play</h3>
+    <p>Choose the simplest expression that is logically equivalent to the question.</p>
+    <p>Correct answer: <strong style="color:var(--green)">10 points</strong></p>
+    <p>Correct answer after hint: <strong style="color:var(--blue)">5 points</strong></p>
+    <p>Each round has 5 questions: 2 Easy, 2 Medium, and 1 Hard, in increasing difficulty. Answer options are shuffled each round!</p>
+  </div>
+</aside>
+</div>
+<footer>Boolean Logic Lab • Learn by practising</footer>
+</div>
+
+<script>
+const bank = [
+{difficulty:"Easy",expr:"(A AND TRUE) OR (B AND FALSE)",answer:"A",options:["A","B","A OR B","FALSE"],hint:"Simplify each AND term first. What does AND TRUE leave unchanged? What does AND FALSE produce?",explain:"(A AND TRUE) OR (B AND FALSE)<br>= A OR (B AND FALSE) <em>(Identity Law: A AND TRUE = A)</em><br>= A OR FALSE <em>(Domination Law: B AND FALSE = FALSE)</em><br>= A <em>(Identity Law: A OR FALSE = A)</em><br>Multiplying by TRUE leaves a variable unchanged; AND FALSE makes a term FALSE."},
+{difficulty:"Easy",expr:"X OR (X AND Y)",answer:"X",options:["X","Y","X AND Y","X OR Y"],hint:"The variable outside the brackets also appears in the AND term.",explain:"X OR (X AND Y)<br>= X <em>(Absorption Law: X OR (X AND Y) = X)</em><br>The AND term cannot add any cases where the expression is TRUE that X does not already cover."},
+{difficulty:"Easy",expr:"NOT (NOT P) OR (P AND NOT P)",answer:"P",options:["P","NOT P","TRUE","FALSE"],hint:"Double NOT returns the original variable. P AND NOT P is always FALSE.",explain:"NOT (NOT P) OR (P AND NOT P)<br>= P OR (P AND NOT P) <em>(Double Negation Law: NOT (NOT P) = P)</em><br>= P OR FALSE <em>(Complement Law: P AND NOT P = FALSE)</em><br>= P <em>(Identity Law: P OR FALSE = P)</em>"},
+{difficulty:"Easy",expr:"NOT (A OR NOT B)",answer:"NOT A AND B",options:["NOT A AND B","NOT A OR B","A AND NOT B","NOT A AND NOT B"],hint:"Use De Morgan's Law: change OR to AND and negate both terms. Remember that NOT (NOT B) becomes B.",explain:"NOT (A OR NOT B)<br>= NOT A AND NOT (NOT B) <em>(De Morgan's Law: NOT (X OR Y) = NOT X AND NOT Y)</em><br>= NOT A AND B <em>(Double Negation Law: NOT (NOT B) = B)</em><br>De Morgan's Law changes OR to AND and negates both terms."},
+{difficulty:"Medium",expr:"NOT (NOT X AND Y) OR X",answer:"X OR NOT Y",options:["X OR NOT Y","X AND NOT Y","NOT X OR Y","X OR Y"],hint:"Apply De Morgan's Law to the NOT outside the brackets, then use the Idempotent Law.",explain:"NOT (NOT X AND Y) OR X<br>= X OR NOT Y OR X <em>(De Morgan's Law: NOT (M AND N) = NOT M OR NOT N; Double Negation: NOT (NOT X) = X)</em><br>= X OR NOT Y <em>(Idempotent Law: X OR X = X)</em><br>Reordering the OR terms uses the Commutative/Associative Laws; the repeated X is then removed."},
+{difficulty:"Medium",expr:"NOT ((A AND B) OR (NOT A AND B))",answer:"NOT B",options:["NOT B","B","NOT A","TRUE"],hint:"Factor B from both terms inside the brackets. Then use A OR NOT A = TRUE.",explain:"NOT ((A AND B) OR (NOT A AND B))<br>= NOT (B AND (A OR NOT A)) <em>(Distributive Law, factoring B)</em><br>= NOT (B AND TRUE) <em>(Complement Law: A OR NOT A = TRUE)</em><br>= NOT B <em>(Identity Law: B AND TRUE = B)</em><br>The two terms inside the brackets share B, so factoring reveals a tautology."},
+{difficulty:"Medium",expr:"NOT (NOT (A OR B) OR C)",answer:"(A OR B) AND NOT C",options:["(A OR B) AND NOT C","NOT A AND NOT B AND NOT C","(A AND B) OR NOT C","A OR B OR NOT C"],hint:"Apply De Morgan's Law to the outermost NOT. Then simplify the double negation.",explain:"NOT (NOT (A OR B) OR C)<br>= NOT (NOT (A OR B)) AND NOT C <em>(De Morgan's Law: NOT (X OR Y) = NOT X AND NOT Y)</em><br>= (A OR B) AND NOT C <em>(Double Negation Law: NOT (NOT X) = X)</em>"},
+{difficulty:"Easy",expr:"A AND (A OR B)",answer:"A",options:["A","B","A AND B","A OR B"],hint:"This is the dual form of the Absorption Law.",explain:"A AND (A OR B)<br>= A <em>(Absorption Law: A AND (A OR B) = A)</em><br>If A is FALSE, the whole AND is FALSE; if A is TRUE, the bracket is TRUE. The result is always A."},
+{difficulty:"Medium",expr:"(A AND B) OR (A AND NOT B)",answer:"A",options:["A","B","NOT A","A AND B"],hint:"Factor out A. What is B OR NOT B?",explain:"(A AND B) OR (A AND NOT B)<br>= A AND (B OR NOT B) <em>(Distributive Law, factoring A)</em><br>= A AND TRUE <em>(Complement Law: B OR NOT B = TRUE)</em><br>= A <em>(Identity Law: A AND TRUE = A)</em>"},
+{difficulty:"Medium",expr:"(X OR FALSE) AND TRUE",answer:"X",options:["X","FALSE","TRUE","NOT X"],hint:"Apply Identity Law to both constants.",explain:"(X OR FALSE) AND TRUE<br>= X AND TRUE <em>(Identity Law: X OR FALSE = X)</em><br>= X <em>(Identity Law: X AND TRUE = X)</em>"},
+{difficulty:"Easy",expr:"NOT (A AND FALSE) OR (B AND TRUE)",answer:"TRUE",options:["TRUE","B","A OR B","NOT B"],hint:"Simplify the two AND terms first, then apply the Domination Law.",explain:"NOT (A AND FALSE) OR (B AND TRUE)<br>= NOT FALSE OR B <em>(Domination Law: A AND FALSE = FALSE; Identity Law: B AND TRUE = B)</em><br>= TRUE OR B <em>(Complement Law: NOT FALSE = TRUE)</em><br>= TRUE <em>(Domination Law: TRUE OR B = TRUE)</em><br>Because TRUE OR anything is TRUE, B cannot affect the result."},
+{difficulty:"Easy",expr:"NOT (A AND NOT A)",answer:"TRUE",options:["TRUE","FALSE","A","NOT A"],hint:"A AND NOT A is a contradiction and always FALSE.",explain:"NOT (A AND NOT A)<br>= NOT FALSE <em>(Complement Law: A AND NOT A = FALSE)</em><br>= TRUE <em>(Complement Law: NOT FALSE = TRUE)</em><br>A and NOT A cannot both be TRUE, so their AND is always FALSE."},
+{difficulty:"Medium",expr:"(A OR B) AND (A OR NOT B)",answer:"A",options:["A","B","NOT A","A OR B"],hint:"Use the distributive law in reverse to factor A.",explain:"(A OR B) AND (A OR NOT B)<br>= A OR (B AND NOT B) <em>(Distributive Law: (X OR Y) AND (X OR Z) = X OR (Y AND Z))</em><br>= A OR FALSE <em>(Complement Law: B AND NOT B = FALSE)</em><br>= A <em>(Identity Law: A OR FALSE = A)</em>"},
+{difficulty:"Easy",expr:"NOT (A OR FALSE)",answer:"NOT A",options:["NOT A","A","TRUE","FALSE"],hint:"Simplify inside the brackets using Identity Law, then apply NOT.",explain:"NOT (A OR FALSE)<br>= NOT A <em>(Identity Law: A OR FALSE = A)</em><br>The bracket simplifies to A, so the NOT remains applied to A."},
+{difficulty:"Easy",expr:"NOT (A AND TRUE)",answer:"NOT A",options:["NOT A","A","TRUE","FALSE"],hint:"Simplify inside the brackets before applying NOT.",explain:"NOT (A AND TRUE)<br>= NOT A <em>(Identity Law: A AND TRUE = A)</em><br>The bracket simplifies to A, so the NOT remains applied to A."},
+{difficulty:"Medium",expr:"(A OR A) AND (B OR FALSE)",answer:"A AND B",options:["A AND B","A OR B","A","B"],hint:"Use Idempotent Law on A OR A, and Identity Law on B OR FALSE.",explain:"(A OR A) AND (B OR FALSE)<br>= A AND (B OR FALSE) <em>(Idempotent Law: A OR A = A)</em><br>= A AND B <em>(Identity Law: B OR FALSE = B)</em>"},
+{difficulty:"Medium",expr:"NOT (NOT A OR NOT B)",answer:"A AND B",options:["A AND B","NOT A AND NOT B","A OR B","NOT A OR B"],hint:"Use De Morgan's Law, then double negation.",explain:"NOT (NOT A OR NOT B)<br>= NOT (NOT A) AND NOT (NOT B) <em>(De Morgan's Law: NOT (X OR Y) = NOT X AND NOT Y)</em><br>= A AND B <em>(Double Negation Law: NOT (NOT A) = A)</em>"},
+{difficulty:"Hard",expr:"NOT (A OR B) OR (A AND B)",answer:"(NOT A AND NOT B) OR (A AND B)",options:["(NOT A AND NOT B) OR (A AND B)","A OR B","A AND B","NOT A OR NOT B"],hint:"Apply De Morgan's Law to the first term. This expression cannot be reduced to one variable.",explain:"NOT (A OR B) OR (A AND B)<br>= (NOT A AND NOT B) OR (A AND B) <em>(De Morgan's Law: NOT (A OR B) = NOT A AND NOT B)</em><br>This is already simplified: it is TRUE when both inputs are FALSE or both are TRUE. No further Boolean law combines these two terms into a simpler expression."},
+{difficulty:"Easy",expr:"(A AND TRUE) OR (A AND A)",answer:"A",options:["A","TRUE","FALSE","NOT A"],hint:"Apply Identity Law and Idempotent Law.",explain:"(A AND TRUE) OR (A AND A)<br>= A OR (A AND A) <em>(Identity Law: A AND TRUE = A)</em><br>= A OR A <em>(Idempotent Law: A AND A = A)</em><br>= A <em>(Idempotent Law: A OR A = A)</em>"},
+{difficulty:"Easy",expr:"NOT (NOT X OR X)",answer:"FALSE",options:["FALSE","TRUE","X","NOT X"],hint:"Inside the brackets, X OR NOT X is always TRUE.",explain:"NOT (NOT X OR X)<br>= NOT TRUE <em>(Complement Law: NOT X OR X = TRUE)</em><br>= FALSE <em>(Complement Law: NOT TRUE = FALSE)</em>"},
+{difficulty:"Medium",expr:"(A OR B) OR (A AND B)",answer:"A OR B",options:["A OR B","A AND B","A","B"],hint:"The AND term is already covered whenever A OR B is TRUE.",explain:"(A OR B) OR (A AND B)<br>= A OR B <em>(Absorption Law: X OR (X AND Y) = X, with X = A OR B)</em><br>The AND term is already included whenever A OR B is TRUE, so it adds no new condition."},
+{difficulty:"Medium",expr:"(A AND B) AND (A OR B)",answer:"A AND B",options:["A AND B","A OR B","A","B"],hint:"If A AND B is TRUE, then A OR B must also be TRUE.",explain:"(A AND B) AND (A OR B)<br>= A AND B <em>(Absorption Law: X AND (X OR Y) = X, with X = A AND B)</em><br>If A AND B is TRUE, then A OR B is automatically TRUE; the second bracket is redundant."},
+{difficulty:"Hard",expr:"NOT (A AND B) AND A",answer:"A AND NOT B",options:["A AND NOT B","NOT A AND B","NOT A OR NOT B","A"],hint:"Apply De Morgan's Law, then simplify A AND (NOT A OR NOT B).",explain:"NOT (A AND B) AND A<br>= (NOT A OR NOT B) AND A <em>(De Morgan's Law: NOT (A AND B) = NOT A OR NOT B)</em><br>= (A AND NOT A) OR (A AND NOT B) <em>(Distributive Law)</em><br>= FALSE OR (A AND NOT B) <em>(Complement Law: A AND NOT A = FALSE)</em><br>= A AND NOT B <em>(Identity Law: FALSE OR X = X)</em>"},
+{difficulty:"Hard",expr:"NOT (A OR B) OR NOT C",answer:"NOT A AND NOT B OR NOT C",options:["NOT A AND NOT B OR NOT C","A OR B OR C","NOT A OR NOT B AND NOT C","NOT (A OR B OR C)"],hint:"Use De Morgan's Law on NOT (A OR B). The remaining NOT C stays unchanged.",explain:"NOT (A OR B) OR NOT C<br>= (NOT A AND NOT B) OR NOT C <em>(De Morgan's Law: NOT (A OR B) = NOT A AND NOT B)</em><br>This is simplified: De Morgan's Law applies to the first term; NOT C is already a single literal."}
+];
+
+let session=[],index=0,score=0,hintUsed=false,completed=false;
+let responses = {}; // question id -> {choice, correct, hintUsed}
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+function restartGame(){
+  const easy=shuffle(bank.filter(q=>q.difficulty==="Easy")).slice(0,2);
+  const medium=shuffle(bank.filter(q=>q.difficulty==="Medium")).slice(0,2);
+  const hard=shuffle(bank.filter(q=>q.difficulty==="Hard")).slice(0,1);
+  session=[...easy,...medium,...hard].map((q,idx)=>({...q,sessionId:idx,options:shuffle(q.options)}));
+  index=0;score=0;responses={};completed=false;
+  document.getElementById("score").textContent=score;
+  document.getElementById("next-button").textContent="Next Question →";
+  document.getElementById("next-button").onclick=nextQuestion;
+  document.getElementById("hint-button").classList.remove("hidden");
+  render();
+}
+function render(){
+  const q=session[index];
+  if(!q){finish();return;}
+  hintUsed=false;
+  const saved=responses[q.sessionId];
+  document.getElementById("question-number").textContent="Question "+(index+1);
+  document.getElementById("progress-text").textContent=(index+1)+" / "+session.length;
+  document.getElementById("progress-fill").style.width=((index+1)/session.length*100)+"%";
+  document.getElementById("expression").textContent=q.expr;
+  const db=document.getElementById("difficulty-badge");db.textContent=q.difficulty.toUpperCase();
+  db.className="badge difficulty "+q.difficulty.toLowerCase();
+  document.getElementById("answers").innerHTML="";
+  const fb=document.getElementById("feedback");fb.className="feedback";
+  document.getElementById("next-button").disabled=!saved;
+  document.getElementById("next-button").textContent=index===session.length-1?"Finish →":"Next Question →";
+  document.getElementById("hint-button").textContent=saved&&saved.hintUsed?"Hint used":"💡 Hint";
+  document.getElementById("hint-button").disabled=!!(saved&&saved.hintUsed);
+  buildNavigation();
+
+  q.options.forEach(option=>{
+    const b=document.createElement("button");
+    b.className="answer";b.textContent=option;
+    if(saved){
+      b.disabled=true;
+      if(option===q.answer)b.classList.add("correct");
+      if(option===saved.choice&&!saved.correct)b.classList.add("wrong");
+    }else{
+      b.onclick=()=>check(option,b);
+    }
+    document.getElementById("answers").appendChild(b);
+  });
+  if(saved) showSavedFeedback(q,saved);
+}
+function buildNavigation(){
+  const nav=document.getElementById("question-nav");
+  nav.innerHTML="";
+  session.forEach((q,i)=>{
+    const b=document.createElement("button");
+    const saved=responses[q.sessionId];
+    b.className="qnav "+(i===index?"current":"")+(saved?(saved.correct?" correct":" incorrect"):" unanswered");
+    b.textContent=i+1;
+    b.title=saved?(saved.correct?"Correct answer":"Incorrect answer"):"Unanswered";
+    b.onclick=()=>{index=i;render();};
+    nav.appendChild(b);
+  });
+}
+function check(choice,button){
+  if(responses[session[index].sessionId])return;
+  const q=session[index],correct=choice===q.answer;
+  responses[q.sessionId]={choice,correct,hintUsed};
+  if(correct){score+=hintUsed?5:10;document.getElementById("score").textContent=score;}
+  render();
+}
+function showSavedFeedback(q,saved){
+  const fb=document.getElementById("feedback");
+  fb.className="feedback show "+(saved.correct?"good":"bad");
+  document.getElementById("feedback-title").textContent=saved.correct?"✓ Correct!":"✗ Not quite!";
+  document.getElementById("feedback-text").innerHTML="<strong>Your answer:</strong> "+saved.choice+
+    "<br><strong>Correct answer:</strong> "+q.answer+"<br><br>"+q.explain;
+}
+function showHint(){
+  const q=session[index],saved=responses[q.sessionId];
+  if(hintUsed||(saved&&saved.hintUsed))return;
+  hintUsed=true;
+  const fb=document.getElementById("feedback");
+  fb.className="feedback show";
+  document.getElementById("feedback-title").textContent="💡 Hint";
+  document.getElementById("feedback-text").textContent=q.hint;
+  document.getElementById("hint-button").textContent="Hint used";
+  document.getElementById("hint-button").disabled=true;
+}
+function nextQuestion(){
+  if(index<session.length-1){index++;render();}
+  else finish();
+}
+function finish(){
+  if(completed)return;
+  completed=true;
+  const correctCount=Object.values(responses).filter(r=>r.correct).length;
+  const incorrectCount=session.length-correctCount;
+  document.getElementById("question-number").textContent="Completed!";
+  document.getElementById("progress-text").textContent=session.length+" / "+session.length;
+  document.getElementById("progress-fill").style.width="100%";
+  document.getElementById("expression").textContent="Round complete! Review your answers using the navigation above.";
+  document.getElementById("answers").innerHTML="";
+  const fb=document.getElementById("feedback");
+  fb.className="feedback show good";
+  document.getElementById("feedback-title").textContent="🏆 Practice Complete!";
+  const praise=score>=45?"Outstanding! You have mastered these Boolean simplification skills!":score>=35?"Excellent work! Your Boolean logic is really strong!":score>=25?"Great effort! You're building a solid understanding of Boolean laws!":score>=15?"Good try! Keep practising and you'll get even better!":"Keep going! Every question is a chance to learn and improve. Try another round!";
+  document.getElementById("feedback-text").innerHTML=`<div class="celebration"><div style="font-size:42px">🎉 ✨ 🏆</div><h2>${praise}</h2><div class="big-score">${score}<span style="font-size:22px"> / ${session.length*10}</span></div><p><strong>${correctCount}</strong> correct · <strong>${incorrectCount}</strong> incorrect</p><p>Use the numbered navigation to review your answers, or restart for a new shuffled round.</p></div>`;
+  document.getElementById("next-button").disabled=false;
+  document.getElementById("next-button").textContent="↻ Restart with Shuffle";
+  document.getElementById("next-button").onclick=restartGame;
+  document.getElementById("hint-button").classList.add("hidden");
+  buildNavigation();
+  launchConfetti();
+}
+function launchConfetti(){
+  const colors=["#fbbf24","#34d399","#60a5fa","#f472b6","#a78bfa","#fb7185"];
+  for(let i=0;i<100;i++){
+    const piece=document.createElement("div");piece.className="confetti";
+    piece.style.left=Math.random()*100+"vw";
+    piece.style.background=colors[Math.floor(Math.random()*colors.length)];
+    piece.style.animationDelay=Math.random()*0.8+"s";
+    piece.style.animationDuration=(2+Math.random()*1.8)+"s";
+    piece.style.transform=`rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(piece);
+    setTimeout(()=>piece.remove(),4500);
+  }
+}
+
+restartGame();
+</script>
+</body>
+</html>
